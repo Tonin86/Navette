@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Générateur de Bon d'envoi</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Générateur de Bon d'envoi</h1>
+
+    <!-- Formulaire pour saisir le contenu du PDF -->
+    <form id="bonEnvoiForm" class="form">
+      <div class="form-group">
+        <label for="expediteur">Expéditeur :</label>
+        <input type="text" id="expediteur" class="form-input" placeholder="Nom de l'expéditeur">
+      </div>
+
+      <div class="form-group">
+        <label for="siteExpedition">Site d'expédition :</label>
+        <select id="siteExpedition" class="form-select">
+          <option value="">Choisir un site</option>
+          <option value="Champdeniers">Champdeniers</option>
+          <option value="La Rochelle">La Rochelle</option>
+          <option value="Tulle">Tulle</option>
+          <option value="Limoges">Limoges</option>
+          <option value="Poitiers">Poitiers</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="destinataire">Destinataire :</label>
+        <input type="text" id="destinataire" class="form-input" placeholder="Nom du destinataire">
+      </div>
+
+      <div class="form-group">
+        <label for="siteDestination">Site de destination :</label>
+        <select id="siteDestination" class="form-select">
+          <option value="">Choisir un site</option>
+          <option value="Champdeniers">Champdeniers</option>
+          <option value="La Rochelle">La Rochelle</option>
+          <option value="Tulle">Tulle</option>
+          <option value="Limoges">Limoges</option>
+          <option value="Poitiers">Poitiers</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="date">Date :</label>
+        <input type="date" id="date" class="form-input">
+      </div>
+
+      <div class="form-group">
+        <label for="numeroTicket">Numéro de ticket :</label>
+        <input type="text" id="numeroTicket" class="form-input" placeholder="Numéro de ticket">
+      </div>
+
+      <button type="submit" id="generatePDF" class="form-button">Générer un Bon d'envoi PDF</button>
+    </form>
+  </div>
+
+  <!-- Charger la bibliothèque pdfmake -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.68/pdfmake.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.68/vfs_fonts.js"></script>
+
+  <script>
+    // Code pour générer le PDF
+    document.getElementById('bonEnvoiForm').addEventListener('submit', function (event) {
+      event.preventDefault();
+      // Récupérer le contenu saisi par l'utilisateur
+      var expediteur = document.getElementById('expediteur').value;
+      var siteExpedition = document.getElementById('siteExpedition').value;
+      var destinataire = document.getElementById('destinataire').value;
+      var siteDestination = document.getElementById('siteDestination').value;
+      var date = document.getElementById('date').value;
+      var numeroTicket = document.getElementById('numeroTicket').value;
+
+      // Fonction pour formater la date au format jour-mois-année
+      function formatDate(dateString) {
+        const options = { day: 'numeric', month: 'numeric', year: 'numeric' };
+        return new Date(dateString).toLocaleDateString('fr-FR', options);
+      }
+
+      // Formater la date dans le bon format
+      var formattedDate = formatDate(date);
+
+      // Définir le style du PDF
+      var styles = {
+        header: {
+          fontSize: 24,
+          bold: true,
+          color: '#005571',
+          margin: [0, 0, 0, 20],
+          alignment: 'center'
+        },
+        table: {
+          margin: [0, 5, 0, 15],
+          layout: {
+            fillColor: function (i, node) {
+              return (i === 0 || i % 2 === 0) ? '#f0f0f0' : null; // Alterner les couleurs de fond des lignes du tableau
+            },
+            hLineWidth: function (i, node) {
+              return (i === 0 || i === node.table.body.length) ? 0 : 1;
+            },
+            vLineWidth: function (i, node) {
+              return 0;
+            },
+            hLineColor: function (i, node) {
+              return '#ccc';
+            },
+            paddingLeft: function (i, node) {
+              return 5;
+            },
+            paddingRight: function (i, node) {
+              return 5;
+            },
+            paddingTop: function (i, node) {
+              return 5;
+            },
+            paddingBottom: function (i, node) {
+              return 5;
+            }
+          }
+        }
+      };
+
+      // Définir le contenu du PDF en utilisant le contenu saisi
+      var docDefinition = {
+        content: [
+          { text: 'Bon d\'envoi', style: 'header' },
+          {
+            table: {
+              widths: ['*'],
+              body: [
+                [{ text: 'Expéditeur:', bold: true, fillColor: '#e0f2f1' }],
+                [expediteur]
+              ]
+            },
+            style: 'table'
+          },
+          {
+            table: {
+              widths: ['*'],
+              body: [
+                [{ text: 'Site d\'expédition:', bold: true, fillColor: '#e0f2f1' }],
+                [siteExpedition]
+              ]
+            },
+            style: 'table'
+          },
+          {
+            table: {
+              widths: ['*'],
+              body: [
+                [{ text: 'Destinataire:', bold: true, fillColor: '#e0f2f1' }],
+                [destinataire]
+              ]
+            },
+            style: 'table'
+          },
+          {
+            table: {
+              widths: ['*'],
+              body: [
+                [{ text: 'Site de destination:', bold: true, fillColor: '#e0f2f1' }],
+                [siteDestination]
+              ]
+            },
+            style: 'table'
+          },
+          {
+            table: {
+              widths: ['*'],
+              body: [
+                [{ text: 'Date:', bold: true, fillColor: '#e0f2f1' }],
+                [formattedDate] // Utiliser la date formatée ici
+              ]
+            },
+            style: 'table'
+          },
+          {
+            table: {
+              widths: ['*'],
+              body: [
+                [{ text: 'Numéro de ticket:', bold: true, fillColor: '#e0f2f1' }],
+                [numeroTicket]
+              ]
+            },
+            style: 'table'
+          },
+        ],
+        styles: styles
+      };
+
+      // Générer le PDF et l'ouvrir dans une nouvelle fenêtre
+      pdfMake.createPdf(docDefinition).open();
+    });
+  </script>
+</body>
+</html>
